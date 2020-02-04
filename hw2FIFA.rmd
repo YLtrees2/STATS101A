@@ -1,0 +1,60 @@
+---
+title: "004997466_hw2_Stat101A"
+author: "Yongqian Li"
+date: "2020/1/14"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(ggplot2)
+library(car)
+#Sys.setlocale('LC_ALL','C')
+```
+
+## 1
+
+### (a).
+
+```{r}
+train <- read.csv("FifaTrainNew.csv")
+test <- read.csv("FifaNoY.csv")
+```
+
+```{r}
+model <- lm(WageNew ~ Overall, data=train)
+#model <- lm(train$WageNew ~ train$Overall)
+```
+
+```{r}
+inverseResponsePlot(model)
+summary(powerTransform(cbind(train$WageNew, train$Overall)~1, data=train))
+```
+
+```{r}
+
+lm2 <- lm(log(WageNew) ~ Overall, data=train)
+lm3 <- lm(log(WageNew) ~ Overall^2.25, data = train)
+
+
+
+#predicted_wages <- predict(lm2, test)
+#predicted_wages <- exp(predicted_wages)
+test_modified <- test
+test_modified$Overall <- (test$Overall)^2.25
+
+predicted_wages <- predict(lm3, test)
+predicted_wages <- exp(predicted_wages)
+
+results <- data.frame(Ob=test$Ob) 
+results$WageNew <- predicted_wages
+
+sum(is.na(results))
+```
+
+```{r}
+write.csv(results,'Fifa_results_powerTransform.csv', row.names=FALSE)
+```
