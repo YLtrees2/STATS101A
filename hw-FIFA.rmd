@@ -35,26 +35,42 @@ summary(powerTransform(cbind(train$WageNew, train$Overall)~1, data=train))
 ```
 
 ```{r}
+#lm1 <- lm(log(WageNew) ~ Overall+Special+Age+Potential, data=train)
+lm2 <- lm(log(WageNew) ~ Overall+Special+Age+Potential+HeadingAccuracy+ShortPassing+LongPassing+BallControl+Penalties, data=train)
+#lm3 <- lm(log(WageNew) ~ Overall, data = train)
+#summary(lm1)
+summary(lm2)
+#summary(lm3)
 
-lm2 <- lm(log(WageNew) ~ Overall, data=train)
-lm3 <- lm(log(WageNew) ~ Overall^2.25, data = train)
-
-
-
-#predicted_wages <- predict(lm2, test)
-#predicted_wages <- exp(predicted_wages)
-test_modified <- test
-test_modified$Overall <- (test$Overall)^2.25
-
-predicted_wages <- predict(lm3, test)
-predicted_wages <- exp(predicted_wages)
-
-results <- data.frame(Ob=test$Ob) 
-results$WageNew <- predicted_wages
-
-sum(is.na(results))
 ```
 
 ```{r}
-write.csv(results,'Fifa_results_powerTransform.csv', row.names=FALSE)
+#predicted_wages <- predict(lm2, test)
+#predicted_wages <- exp(predicted_wages)
+test_modified <- test
+test_modified$Overall <- (test$Overall)^2.19
+
+predicted_wages <- predict(lm2, test)
+predicted_wages <- predicted_wages
+
+
+
+predicted_wages_old <- predict(lm1, test)
+
+sum(is.na(predicted_wages))
+
+for(i in 1:5462){
+  if(is.na(predicted_wages[i]))
+    predicted_wages[i] <- predicted_wages_old[i]
+}
+
+results <- data.frame(Ob=test$Ob) 
+results$WageNew <- exp(predicted_wages)
+
+sum(is.na(results))
+#summary(lm2)
+```
+
+```{r}
+write.csv(results,'Fifa_results_powerTransform5.csv', row.names=FALSE)
 ```
